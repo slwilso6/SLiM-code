@@ -1,0 +1,51 @@
+initialize() { 
+	initializeSLiMModelType("nonWF"); //switches SLiM model to nonWF
+	initializeTreeSeq(); //begin tree sequence recording
+	initializeMutationRate(0); // set mutation rate for neutral mutations to 0 (placeholder)
+	initializeMutationType("m1", 0.5, "f", 0.0); // background neutral mutations
+	initializeMutationType("m2", 0.5, "f", 0.6); // Beneficial mutation for later 
+	m2.convertToSubstitution =F; //prevents beneficial mutation from converting into substitution in case of fixation 
+	initializeGenomicElementType("g1", m1, 0.001); // builds chromosome elements, placeholder mutations set on chromosome to effectively leave it empty for beneficial mutation visualization 
+	initializeGenomicElement(g1, 0, 99999);// sets chromosome length
+	initializeRecombinationRate(0);}// 0 recombination rate for somatic mutations
+
+1 early (){ 
+	sim.addSubpop("p1", 1);} // creates population with 1 individual 
+
+// create reproduction block 
+reproduction(){
+	has_beneficial = F; 
+	for (mut in individual.haplosomes.mutations) {
+	if (mut.mutationType == m2) {
+		has_beneficial = T; // checks active population to see if there are any beneficial mutations present 
+		break;
+		}
+	}
+	if(has_beneficial){
+		subpop.addCloned(individual);// if a beneficial mutation is present, cell replicates 
+		}
+	}
+// population maintence
+early () {
+	targetSize = 100; // keeps population size ~ 100 individuals 
+	popSize = p1.individualCount;
+	p1.fitnessScaling = targetSize / popSize; 
+	for (ind in p1.individuals) {
+		if (ind.age >= 2) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
+			ind.fitnessScaling = 0.0;
+		}
+	}
+}
+
+1 late() { 
+	targetInd = sample(p1.individuals, 1); 
+	targetGenome = sample(targetInd.haplosomes, 2); 
+	targetGenome.addNewDrawnMutation(m2, 5000);}// adds mutation to 1 individual in population 
+
+
+//** note ** if you change population size to 100 this model can also represent a mutation spread model instead of an exponential growth model, parameters are roughly the same, but with the initial population size being 100 the model no longer shows population growth
+//save tree output file 
+200 late() {
+	sim.treeSeqOutput("./Beneficial_Mutation_EXP&Spread");
+	sim.simulationFinished();}
+	
