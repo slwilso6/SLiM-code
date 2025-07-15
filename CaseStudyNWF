@@ -1,0 +1,93 @@
+// Keywords: migration, dispersal, CRISPR gene drive
+
+initialize() {
+	initializeSLiMModelType("nonWF"); 
+	initializeTreeSeq();
+	initializeMutationRate(0);
+	initializeMutationType("m1", 0.5, "f", 0.0);   // neutral
+	initializeMutationType("m2", 0.5, "f", 0.0);  // MCR complex
+	initializeGenomicElementType("g1", m1, 1.0);
+	initializeGenomicElement(g1, 0, 99999);
+	initializeRecombinationRate(0);
+}
+1 early() {
+	sim.addSubpop("p1", 1); 
+	sim.addSubpop("p2", 1); 
+	sim.addSubpop("p3", 1);}
+	
+reproduction() { 
+	has_beneficial = F; 
+	for (mut in individual.haplosomes.mutations) { 
+	if (mut.mutationType == m2) {
+		has_beneficial = T; 
+		break; 
+	}
+}
+	if (has_beneficial){
+		subpop.addCloned(individual);
+	}
+}
+early() { 
+	targetSize = 10000; 
+	popSize = p1.individualCount; 
+	p1.fitnessScaling = targetSize / popSize; 
+	for (ind in p1.individuals) {
+		if (ind.age >= 2) 
+			ind.fitnessScaling= 0.0; 
+			}
+		}
+	
+early() { 
+	targetSize2 = 10000; 
+	popSize2 = p2.individualCount; 
+	p2.fitnessScaling = targetSize2 / popSize2; 
+	for (ind in p2.individuals) {
+		if (ind.age >= 2) 
+			ind.fitnessScaling= 0.0; 
+			}
+		}
+	
+early() { 
+	targetSize3 = 10000; 
+	popSize3 = p3.individualCount; 
+	p3.fitnessScaling = targetSize3 / popSize3; 
+	for (ind in p3.individuals) {
+		if (ind.age >= 2) 
+			ind.fitnessScaling= 0.0; 
+			}
+		}
+	
+1 late() {
+	p1.haplosomes[1].addNewDrawnMutation(m2, 10000);
+}
+40 late() { 
+	if (p1.individualCount >0);
+		migrants = sample (p1.individuals,1);
+		p2.takeMigrants(migrants);}
+		
+60 late() { 
+	if (p2.individualCount >0);
+		migrants = sample (p2.individuals,1);
+		p3.takeMigrants(migrants);}
+
+
+mutationEffect(m2) {
+	return 0.80 + subpop.id * 0.15;
+}
+100:10000 modifyChild() {
+	mut = sim.mutationsOfType(m2);
+	if (size(mut) == 1)
+	{
+		hasMutOnChromosome1 = child.haploidGenome1.containsMutations(mut);
+		hasMutOnChromosome2 = child.haploidGenome2.containsMutations(mut);
+		if (hasMutOnChromosome1 & !hasMutOnChromosome2)
+			child.haploidGenome2.addMutations(mut);
+		else if (hasMutOnChromosome2 & !hasMutOnChromosome1)
+			child.haploidGenome1.addMutations(mut);
+	}
+	return T;
+}
+
+81 late() { 
+	sim.treeSeqOutput("./CaseStudy");
+	sim.simulationFinished();}
