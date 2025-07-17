@@ -6,7 +6,6 @@ initialize(){
 	m1.convertToSubstitution = F;
 	initializeMutationType("m2", 0.5, "f",0.6);
 	m2.convertToSubstitution = F;
-	initializeMutationType("m3", 0.5, "f", 0.0);
 	initializeGenomicElementType("g1", m1, 0.4);
 	initializeGenomicElement(g1, 0, 99999);
 	initializeRecombinationRate(0);}
