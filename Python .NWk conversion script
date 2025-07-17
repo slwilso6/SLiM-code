@@ -3,8 +3,8 @@ import os
 import random
 
 # ---- CONFIG ----
-filepath = os.path.expanduser("~/Documents/SMP3.tree")
-output_nwk_path = os.path.expanduser("~/Documents/SMP3.nwk")
+filepath = os.path.expanduser(" input file path here")
+output_nwk_path = os.path.expanduser("output file path here")
 
 inds_per_pop = 150
 valid_pops = [1]  # Corrected for SLiM's population IDs starting at 0
