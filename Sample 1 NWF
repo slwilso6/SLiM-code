@@ -10,7 +10,7 @@ initialize() {
 	initializeRecombinationRate(0);}// 0 recombination rate for somatic mutations
 
 1 early (){ 
-	sim.addSubpop("p1", 1);} // creates population with 1 individual 
+	sim.addSubpop("p1", 100);} // creates population with 100 individuals 
 
 // create reproduction block 
 reproduction(){
@@ -27,7 +27,7 @@ reproduction(){
 	}
 // population maintence
 early () {
-	targetSize = 100; // keeps population size ~ 100 individuals 
+	targetSize = 150; // keeps population size ~ 150 individuals 
 	popSize = p1.individualCount;
 	p1.fitnessScaling = targetSize / popSize; 
 	for (ind in p1.individuals) {
