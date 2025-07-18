@@ -2,10 +2,15 @@
 The script options here are the stepping stones for my overall project to be able to simulate oncogenesis, the first goal was to recreate a case study patient with clonal hematopoiesis
 For beginners to SLiM, I'd highly recommend visiting the messerlab.org website and downloading the SLiM manual. 
 SLiM download is also avaliable on the messerlab.org website 
+
 Key: 
+
 NM: Non-mutant
+
 M: Mutant 
+
 NWF: non wright-fischer
+
 WF: Wright-fischer 
 
 *** Tip for python when doing a newick conversion 
