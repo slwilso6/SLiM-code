@@ -17,6 +17,7 @@ in order for python to be able to run a conversion of the tree file make your th
 All are open source on the web
 
 *** You cannot add mutations to a individual >0 year old in a non WF simulation 
+
 *** For clarity in my final phylogenies many simulation scripts show mutation rate at a rate of 0, this is intentional and does not effect any new mutations added to the population in later generations 
 
 happy simulating :) 
