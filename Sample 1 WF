@@ -1,0 +1,32 @@
+initialize() { 
+	initializeTreeSeq(); //begin tree sequence recording
+	initializeMutationRate(0); // set mutation rate for neutral mutations to 0 (placeholder)
+	initializeMutationType("m1", 0.5, "f", 0.0); // background neutral mutations
+	initializeMutationType("m2", 0.5, "f", 0.3); // Beneficial mutation for later 
+	m2.convertToSubstitution =F; //prevents beneficial mutation from converting into substitution in case of fixation 
+	initializeGenomicElementType("g1", m1, 0.001); // builds chromosome elements, placeholder mutations set on chromosome to effectively leave it empty for beneficial mutation visualization 
+	initializeGenomicElement(g1, 0, 99999);// sets chromosome length
+	initializeRecombinationRate(0); // 0 recombination rate for somatic mutations
+}
+1 early() {
+	sim.addSubpop("p1", 100);} // creates population 1 with 100 individuals
+
+//Seed mutation in 1 individual at Generation 10 
+10 late(){
+	targetInd = sample(p1.individuals, 1); // targetInd will be the 1 individual that receives the mutation 
+	targetGenome = sample(targetInd.haplosomes, 2); // adds mutations to both genomes in individuals 
+	m = targetGenome.addNewDrawnMutation(m2, 5000); //creates the mutation, and places it at 5000 bp on the chromosome 
+	defineGlobal("seedMutation", m); }// creates reference to mutation for later 
+	
+// Spread mutation manually between generations 20-30
+20:30  late() { 
+	targetInd = sample(p1.individuals,1); 
+	targetGenome = sample(targetInd.haplosomes, 2); 
+	targetGenome.addMutations(seedMutation); }
+	
+//save tree output file 
+200 late() {
+	sim.treeSeqOutput("./Beneficial_Mutation_Spread");
+	sim.simulationFinished();}
+	
+	
