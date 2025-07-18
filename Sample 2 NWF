@@ -1,0 +1,36 @@
+initialize(){
+	initializeSLiMModelType("nonWF");
+	initializeTreeSeq();
+	initializeMutationRate(0);
+	initializeMutationType("m1", 0.5, "f",0.0);
+	m1.convertToSubstitution = F;
+	initializeMutationType("m2", 0.5, "f",0.6);
+	m2.convertToSubstitution = F;
+	initializeGenomicElementType("g1", m1, 0.4);
+	initializeGenomicElement(g1, 0, 99999);
+	initializeRecombinationRate(0);}
+	
+1 early () { 
+	sim.addSubpop("p1", 1); }
+	
+reproduction () { 
+	subpop.addCloned(individual);}
+early() { 
+	targetSize = 100; 
+	popSize = p1.individualCount; 
+	p1.fitnessScaling = targetSize / popSize;
+	for (ind in p1.individuals) {
+		if (ind.age >= 100) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
+			ind.fitnessScaling = 0.0;
+		}
+	}
+}
+1 late() { 
+	targetInd = sample(p1.individuals, 1); 
+	targetGenome = sample(targetInd.haplosomes, 2); 
+	targetGenome.addNewDrawnMutation(m2, 5000);}// adds mutation to 1 individual in population 
+
+81 late () { 
+	sim.treeSeqOutput("./Sample2NWF.tree");
+	sim.simulationFinished();}
+	
