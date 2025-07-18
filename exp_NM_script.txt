@@ -1,0 +1,29 @@
+ // Declare global variables
+initialize() {
+ initializeTreeSeq();
+ initializeMutationRate(1e-7);
+ initializeMutationType("m1", 0.5, "f", 0.0);
+ initializeGenomicElementType("g1", m1, 1.0);
+ initializeGenomicElement(g1, 0, 99999);
+ initializeRecombinationRate(1e-8);
+ // Set global variables using `defineGlobal()` (SLiM 3 feature)
+ defineGlobal("growthAcc", 0.0);
+ defineGlobal("growthRate", 1.01);
+}
+1 early() {
+ sim.addSubpop("p1", 100);
+}
+// set growth rate for p1
+// population only grows for 400 ticks 
+1000:1400 early() {
+ growthAcc = growthAcc + (p1.individualCount * (growthRate - 1));
+ if (growthAcc >= 1.0) {
+   increase = asInteger(growthAcc);
+   p1.setSubpopulationSize(p1.individualCount + increase);
+   growthAcc = growthAcc - increase;
+ }
+}
+
+2401 late(){
+ sim.treeSeqOutput("exp_nm.tree");
+ }

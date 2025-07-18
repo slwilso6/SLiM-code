@@ -1,0 +1,157 @@
+initialize() {
+    initializeSLiMModelType("nonWF");
+    initializeTreeSeq();
+    initializeMutationRate(1e-8);
+    initializeMutationType("m1", 0.5, "f", 0.0);
+    initializeGenomicElementType("g1", m1, 1.0);
+    initializeGenomicElement(g1, 0, 99999);
+    initializeRecombinationRate(0);
+}
+
+1 early() {
+    sim.addSubpop("p1", 50);
+    sim.setValue("split_p2_gen", 5000 + asInteger(rnorm(1, 50)[0]));
+    sim.setValue("split_p3_gen", 7000 + asInteger(rnorm(1, 50)[0]));
+}
+
+// Reproduction
+reproduction() {
+    if (runif(1) < 0.8) {
+        subpop.addCloned(individual);
+    }
+
+    split_p2 = sim.getValue("split_p2_gen");
+    split_p3 = sim.getValue("split_p3_gen");
+
+    // Exponential growth in p2
+    exists_p2 = F;
+    for (pop in sim.subpopulations) {
+        if (pop.name == "p2") {
+            exists_p2 = T;
+            break;
+        }
+    }
+    if (exists_p2 & sim.cycle > split_p2 & sim.cycle <= split_p2 + 200) {
+        if (individual.subpopulation.name == "p2") {
+            if (runif(1) < 0.3) {
+                subpop.addCloned(individual);
+            }
+        }
+    }
+
+    // Exponential growth in p3
+    exists_p3 = F;
+    for (pop in sim.subpopulations) {
+        if (pop.name == "p3") {
+            exists_p3 = T;
+            break;
+        }
+    }
+    if (exists_p3 & sim.cycle > split_p3 & sim.cycle <= split_p3 + 200) {
+        if (individual.subpopulation.name == "p3") {
+            if (runif(1) < 0.35) {
+                subpop.addCloned(individual);
+            }
+        }
+    }
+}
+
+// Density regulation and mortality
+early() {
+    targetSize = 1000.0;
+    for (pop in sim.subpopulations) {
+        N = pop.individualCount;
+        scaling = targetSize / N;
+        if (scaling > 1.0) {
+            scaling = 1.0;
+        }
+        pop.fitnessScaling = scaling;
+
+        inds = pop.individuals;
+        old = inds[inds.age > 5];
+        old.fitnessScaling = 0.0;
+    }
+}
+
+// p2 creation
+early() {
+    if (sim.cycle == sim.getValue("split_p2_gen")) {
+        sim.addSubpop("p2", 5);
+    }
+}
+
+// p3 creation
+early() {
+    if (sim.cycle == sim.getValue("split_p3_gen")) {
+        sim.addSubpop("p3", 3);
+    }
+}
+
+// p1 -> p2 migration
+early() {
+    split_p2 = sim.getValue("split_p2_gen");
+    if (sim.cycle >= split_p2 + 10 & sim.cycle <= split_p2 + 60) {
+        exists_p1 = F;
+        exists_p2 = F;
+        for (pop in sim.subpopulations) {
+            if (pop.name == "p1") exists_p1 = T;
+            if (pop.name == "p2") exists_p2 = T;
+        }
+        if (exists_p1 & exists_p2) {
+            base_frac = 0.02;
+            noise = rpois(1,2);
+            nMove = asInteger(base_frac * p1.individualCount + noise);
+            if (nMove > 0) {
+                indsToMove = sample(p1.individuals, nMove);
+                p2.takeMigrants(indsToMove);
+            }
+        }
+    }
+}
+
+// Bottleneck p2
+early() {
+    split_p2 = sim.getValue("split_p2_gen");
+    if (sim.cycle == split_p2 + 150) {
+        exists_p2 = F;
+        for (pop in sim.subpopulations) {
+            if (pop.name == "p2") {
+                exists_p2 = T;
+                break;
+            }
+        }
+        if (exists_p2 & p2.individualCount > 20) {
+            indsToRemove = sample(p2.individuals, p2.individualCount - 20);
+            indsToRemove.fitnessScaling = 0.0;
+        }
+    }
+}
+
+// p2 -> p3 migration
+early() {
+    split_p3 = sim.getValue("split_p3_gen");
+    if (sim.cycle >= split_p3 + 10 & sim.cycle <= split_p3 + 60) {
+        exists_p2 = F;
+        exists_p3 = F;
+        for (pop in sim.subpopulations) {
+            if (pop.name == "p2") exists_p2 = T;
+            if (pop.name == "p3") exists_p3 = T;
+        }
+        if (exists_p2 & exists_p3) {
+            base_frac = 0.05;
+            noise = rpois(1,3);
+            nMove = asInteger(base_frac * p2.individualCount + noise);
+            if (nMove > 0) {
+                indsToMove = sample(p2.individuals, nMove);
+                p3.takeMigrants(indsToMove);
+            }
+        }
+    }
+}
+
+
+// Output results
+10000 late() {
+    sim.outputFixedMutations();
+    sim.treeSeqOutput("split_mig_NM.tree");
+}

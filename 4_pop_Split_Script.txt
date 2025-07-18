@@ -1,0 +1,25 @@
+// Initialization 
+initialize() {
+initializeTreeSeq();
+initializeMutationRate(1e-7); // Example mutation rate 
+initializeMutationType("m1", 0.5, "f", 0.0); // Neutral mutation type 
+initializeGenomicElementType("g1", m1, 1.0); // Genomic element type 
+initializeGenomicElement(g1, 0, 99999); // Genomic element of length 100kb 
+initializeRecombinationRate(1e-8); // Example recombination rate
+}
+// Initial population with one individual 
+1 early() {
+sim.addSubpop("p1", 2000);
+}
+// Branching into three populations
+2000 late() {
+sim.addSubpopSplit("p2", 1000, p1);} // Split off p2 from p1, size 1000 
+4000 late(){
+sim.addSubpopSplit("p3", 500, p2);} // Split off p3 from p1, size 500
+6000 late(){ 
+sim.addSubpopSplit("p4", 250, p3); // Split off p4 from p1, size 250
+}
+
+10000 late(){
+sim.treeSeqOutput("./4_pop_split.trees");
+}

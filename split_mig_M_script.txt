@@ -1,0 +1,140 @@
+initialize() {
+    initializeSLiMModelType("nonWF");
+    initializeTreeSeq();
+    initializeMutationRate(1e-10);
+
+    // Beneficial mutation
+    initializeMutationType("m2", 0.8, "e", 0.1);
+
+    initializeGenomicElementType("g1", m2, 0.01);
+    initializeGenomicElement(g1, 0, 99999);
+    initializeRecombinationRate(0);
+}
+
+1 early() {
+    sim.addSubpop("p1", 50);
+    sim.addSubpop("p2", 10);
+    sim.addSubpop("p3", 10);
+
+    for (pop in sim.subpopulations) {
+        for (ind in pop.individuals) {
+            ind.tag = 0;
+        }
+    }
+
+    // Pick one individual to carry the beneficial mutation
+    targetInd = sample(p1.individuals, 1);
+    targetInd.haplosomes[0].addNewMutation(m2,1,50000);
+    catn("Seeded beneficial mutation in individual " + targetInd.index);
+}
+
+
+// Migration events
+500 late() {
+    migrationProb = 0.1; // 50% chance of migration
+
+    // --- p1 -> p2 migration ---
+    migrants_p1 = c();
+    for (ind in p1.individuals) {
+        for (mut in ind.haplosomes.mutations) {
+            if (mut.mutationType == m2) {
+                if (runif(1) < migrationProb) {
+                    migrants_p1 = c(migrants_p1, ind);
+                    ind.tag = 1;
+                }
+                break;
+            }
+        }
+    }
+    if (size(migrants_p1) > 0) {
+        p2.takeMigrants(migrants_p1);
+        catn("Generation " + sim.cycle + ": Migrated " + size(migrants_p1) + " individuals from p1 to p2.");
+    }
+}
+1000 late() {
+	migrationProb = 0.1;
+    // --- p2 -> p3 migration ---
+    migrants_p2 = c();
+    for (ind in p2.individuals) {
+        for (mut in ind.haplosomes.mutations) {
+            if (mut.mutationType == m2) {
+                if (runif(1) < migrationProb) {
+                    migrants_p2 = c(migrants_p2, ind);
+                    ind.tag = 1;
+                }
+                break;
+            }
+        }
+    }
+    if (size(migrants_p2) > 0) {
+        p3.takeMigrants(migrants_p2);
+        catn("Generation " + sim.cycle + ": Migrated " + size(migrants_p2) + " individuals from p2 to p3.");
+    }
+}
+
+
+// Reproduction: extra offspring for carriers
+reproduction() {
+    // Always one offspring
+    child1 = subpop.addCloned(individual);
+    child1.tag = individual.tag;
+
+    // Check for beneficial mutation
+    has_beneficial = F;
+    for (mut in individual.haplosomes.mutations) {
+        if (mut.mutationType == m2) {
+            has_beneficial = T;
+            break;
+        }
+    }
+    if (has_beneficial) {
+        child2 = subpop.addCloned(individual);
+        child2.tag = individual.tag;
+    }
+}
+
+// Density regulation and mortality
+early() {
+    targetSize = 1000.0;
+    for (pop in sim.subpopulations) {
+        N = pop.individualCount;
+        scaling = targetSize / N;
+        if (scaling > 1.0) {
+            scaling = 1.0;
+        }
+        pop.fitnessScaling = scaling;
+
+        inds = pop.individuals;
+        old = inds[inds.age > 10];
+        old.fitnessScaling = 0.0;
+    }
+}
+
+// Tracking migrant counts
+late() {
+    nMigrants_p2 = 0;
+    if (p2.individualCount > 0) {
+        for (ind in p2.individuals) {
+            if (ind.tag == 1); {
+                nMigrants_p2 = nMigrants_p2 + 1;
+            }
+        }
+        catn("Generation " + sim.cycle + ": " + nMigrants_p2 + " individuals in p2 originated from p1.");
+    }
+
+    nMigrants_p3 = 0;
+    if (p3.individualCount > 0) {
+        for (ind in p3.individuals) {
+            if (ind.tag == 1); {
+                nMigrants_p3 = nMigrants_p3 + 1;
+            }
+        }
+        catn("Generation " + sim.cycle + ": " + nMigrants_p3 + " individuals in p3 originated from p1/p2.");
+    }
+}
+
+// Output final data
+1500 late() {
+    sim.outputFixedMutations();
+    sim.treeSeqOutput("split_mig_M.tree");
+}
