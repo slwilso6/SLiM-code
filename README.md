@@ -14,7 +14,7 @@ NWF: non wright-fischer
 WF: Wright-fischer 
 
 *** Tip for python when doing a newick conversion 
-in order for python to be able to run a conversion of the tree file make your the following add-ons are downloaded:
+in order for python to be able to run a conversion of the tree file make sure the following add-ons are downloaded:
 - homebrew
 - pip 
 - pyslim
