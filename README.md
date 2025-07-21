@@ -16,7 +16,7 @@ WF: Wright-fischer
 *** Tip for python when doing a newick conversion 
 in order for python to be able to run a conversion of the tree file make sure the following add-ons are downloaded:
 - homebrew: https://brew.sh/
-- pip: https://pip.pypa.io/en/stable/installation/  (or conda) 
+- pip: https://pip.pypa.io/en/stable/installation/  (or conda: https://docs.conda.io/projects/conda/en/stable/user-guide/install/index.html) 
 - pyslim: https://tskit.dev/pyslim/docs/latest/installation.html
 - tskit: https://tskit.dev/tskit/docs/stable/installation.html
   
