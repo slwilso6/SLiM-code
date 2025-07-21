@@ -1,0 +1,58 @@
+initialize() {
+    defineConstant("initialSize", 50);
+    defineConstant("splitSize", 50);
+    defineConstant("growthRate", 0.0009); // slow growth
+    defineConstant("splitInterval", 100);
+    defineConstant("totalSplits", 8);
+    initializeTreeSeq();
+    initializeMutationRate(1e-7);
+    initializeMutationType("m1", 0.5, "f", 0.1);
+    initializeGenomicElementType("g1", m1, 1.0);
+    initializeGenomicElement(g1, 0, 99999);
+    initializeRecombinationRate(1e-8);
+}
+
+1 early() {
+    sim.addSubpop("p1", initialSize);
+    sim.setValue("splitTimes", c(1)); // track split generation
+}
+
+// Sequential splits with one-way migration
+early() {
+    gen = sim.cycle;
+    currentPops = sim.subpopulations;
+    numPops = length(currentPops);
+    
+    if ((gen - 1) % splitInterval == 0 & numPops < totalSplits) {
+        parentPop = currentPops[numPops - 1];
+        newPopName = "p" + (numPops + 1);
+        sim.addSubpopSplit(newPopName, splitSize, parentPop);
+
+        // Track time of creation
+        splitTimes = sim.getValue("splitTimes");
+        sim.setValue("splitTimes", c(splitTimes, gen));
+
+        // One-way migration: parent → new
+        newPop = sim.subpopulations[numPops];  // get just-created pop
+        parentPop.setMigrationRates(newPop, 0.01);  // one-way only
+    }
+}
+
+// Growth phase
+late() {
+    splitTimes = sim.getValue("splitTimes");
+    for (pop in sim.subpopulations) {
+        i = asInteger(pop.id);
+        splitGen = splitTimes[i - 1];
+        gensSinceSplit = sim.cycle - splitGen;
+        newSize = asInteger(initialSize * exp(growthRate * gensSinceSplit));
+        pop.setSubpopulationSize(newSize);
+    }
+}
+
+// Output
+1999 late() {
+    sim.treeSeqOutput("unidirectional_split.trees");
+}
+2000 late() {
+    sim.outputFixedMutations();

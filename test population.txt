@@ -1,0 +1,70 @@
+initialize() {
+    defineConstant("initialSize", 50);
+    defineConstant("splitSize", 50);
+    defineConstant("growthRate", 0.0009); // very slow growth
+    defineConstant("splitInterval", 100);
+    defineConstant("totalSplits", 8); // max 8 populations
+    defineConstant("genomeSize", 1e8);// total genom length
+    defineConstant("exonStart", 5e7); //exon region start
+    defineConstant("exonEnd", 5e7 + 9999); // 10 kb exon region 
+    defineConstant("mutRate_bg", 2e-7); // 20 muts/gen across 1e8 bp 
+    defineConstant("mutRate_exon", 1e-5); //0.1 muts/gen across 10kb
+   
+    initializeTreeSeq();
+    initializeMutationRate(mutRate_bg);
+    initializeMutationType("m1", 0.5, "f", 0.0); //neutral
+    initializeMutationType("m2", 0.5, "f", 0.2); // potential drivers
+    initializeGenomicElementType("g1", m1, 1.0);
+    initializeGenomicElementType("g2", m2, 1.0);
+    initializeGenomicElement(g1, 0, exonStart -1);
+    initializeGenomicElement(g2, exonStart, exonEnd);
+    initializeGenomicElement(g1, exonEnd + 1, genomeSize - 1);
+    initializeRecombinationRate(0);
+}
+
+1 early() {
+    sim.addSubpop("p1", initialSize);
+    sim.setValue("splitTimes", c(1)); // First pop born at gen 1
+}
+
+// Stepwise splits
+early() {
+    gen = sim.cycle;
+    currentPops = sim.subpopulations;
+    numPops = length(currentPops);
+    
+    if ((gen - 1) % splitInterval == 0 & numPops < totalSplits) {
+        parentPop = currentPops[numPops - 1];
+        newPopName = "p" + (numPops + 1);
+        sim.addSubpopSplit(newPopName, splitSize, parentPop);
+
+        // Track split generation
+        splitTimes = sim.getValue("splitTimes");
+        sim.setValue("splitTimes", c(splitTimes, gen));
+
+        // Optional migration
+        newPop = sim.subpopulations[numPops];
+        parentPop.setMigrationRates(newPop, 0.01);
+        newPop.setMigrationRates(parentPop, 0.01);
+    }
+}
+
+// Slow exponential growth
+late() {
+    splitTimes = sim.getValue("splitTimes");
+    for (pop in sim.subpopulations) {
+        i = asInteger(pop.id);
+        splitGen = splitTimes[i - 1];
+        gensSinceSplit = sim.cycle - splitGen;
+        newSize = asInteger(initialSize * exp(growthRate * gensSinceSplit));
+        pop.setSubpopulationSize(newSize);
+    }
+}
+
+// Output
+2050 late() {
+    sim.treeSeqOutput("test populations");
+}
+2051 late() 
+    sim.outputFixedMutations();
+}

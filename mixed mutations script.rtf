@@ -1,0 +1,47 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Roman;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 initialize() \{\
+    defineConstant("N", 10000);              // population size\
+    defineConstant("genomeSize", 1e8);       // total genome length\
+    defineConstant("exonStart", 5e7);        // exon region start\
+    defineConstant("exonEnd", 5e7 + 9999);   // 10kb exon region\
+    defineConstant("mutRate_bg", 2e-7);      // 20 muts/gen across 1e8 bp\
+    defineConstant("mutRate_exon", 1e-5);    // 0.1 muts/gen across 10kb\
+\
+    initializeTreeSeq();\
+    initializeMutationRate(mutRate_bg);\
+\
+    // Background somatic mutations (neutral)\
+    initializeMutationType("m1", 0.5, "f", 0.0);\
+    // Exonic mutations (potential drivers)\
+    initializeMutationType("m2", 0.5, "f", 0.2);\
+    initializeMutationType("m3", 0.8, "e", 0.1);\
+    initializeMutationType("m4", 0.1, "g", -0.01,0.2);\
+\
+    initializeGenomicElementType("g1", c(m1,m4), c(1.0,0.5));\
+    initializeGenomicElementType("g2",c(m2,m3), c(0.5,0.2));\
+\
+    initializeGenomicElement(g1, 0, exonStart - 1);\
+    initializeGenomicElement(g2, exonStart, exonEnd);\
+    initializeGenomicElement(g1, exonEnd + 1, genomeSize - 1);\
+\
+    initializeRecombinationRate(0);  // no recombination (somatic)\
+\}\
+\
+1 early() \{\
+    sim.addSubpop("p1", N);\
+\}\
+\
+\
+100 late() \{\
+    sim.treeSeqOutput("mixed mutations");\
+\}\
+\
+}
