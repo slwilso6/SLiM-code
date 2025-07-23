@@ -14,24 +14,15 @@ initialize() {
 
 // create reproduction block 
 reproduction(){
-	has_beneficial = F; 
-	for (mut in individual.haplosomes.mutations) {
-	if (mut.mutationType == m2) {
-		has_beneficial = T; // checks active population to see if there are any beneficial mutations present 
-		break;
-		}
-	}
-	if(has_beneficial){
-		subpop.addCloned(individual);// if a beneficial mutation is present, cell replicates 
-		}
-	}
+ subpop.addCloned(individual);} 
+
 // population maintence
 early () {
 	targetSize = 150; // keeps population size ~ 150 individuals 
 	popSize = p1.individualCount;
 	p1.fitnessScaling = targetSize / popSize; 
 	for (ind in p1.individuals) {
-		if (ind.age >= 2) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
+		if (ind.age >= 100) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
 			ind.fitnessScaling = 0.0;
 		}
 	}
@@ -42,8 +33,6 @@ early () {
 	targetGenome = sample(targetInd.haplosomes, 2); 
 	targetGenome.addNewDrawnMutation(m2, 5000);}// adds mutation to 1 individual in population 
 
-
-//** note ** if you change population size to 100 this model can also represent a mutation spread model instead of an exponential growth model, parameters are roughly the same, but with the initial population size being 100 the model no longer shows population growth
 //save tree output file 
 200 late() {
 	sim.treeSeqOutput("./Beneficial_Mutation_EXP&Spread");
