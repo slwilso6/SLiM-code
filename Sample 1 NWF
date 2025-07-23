@@ -3,7 +3,7 @@ initialize() {
 	initializeTreeSeq(); //begin tree sequence recording
 	initializeMutationRate(0); // set mutation rate for neutral mutations to 0 (placeholder)
 	initializeMutationType("m1", 0.5, "f", 0.0); // background neutral mutations
-	initializeMutationType("m2", 0.5, "f", 0.6); // Beneficial mutation for later 
+	initializeMutationType("m2", 0.5, "f", 0.5); // Beneficial mutation for later 
 	m2.convertToSubstitution =F; //prevents beneficial mutation from converting into substitution in case of fixation 
 	initializeGenomicElementType("g1", m1, 0.001); // builds chromosome elements, placeholder mutations set on chromosome to effectively leave it empty for beneficial mutation visualization 
 	initializeGenomicElement(g1, 0, 99999);// sets chromosome length
