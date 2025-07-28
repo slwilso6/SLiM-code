@@ -16,7 +16,7 @@ initialize(){
 reproduction () { 
 	subpop.addCloned(individual);}
 early() { 
-	targetSize = 100; 
+	targetSize = 150; 
 	popSize = p1.individualCount; 
 	p1.fitnessScaling = targetSize / popSize;
 	for (ind in p1.individuals) {
@@ -30,7 +30,7 @@ early() {
 	targetGenome = sample(targetInd.haplosomes, 2); 
 	targetGenome.addNewDrawnMutation(m2, 5000);}// adds mutation to 1 individual in population 
 
-81 late () { 
+200 late () { 
 	sim.treeSeqOutput("./Sample2NWF.tree");
 	sim.simulationFinished();}
 	
