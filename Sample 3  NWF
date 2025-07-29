@@ -10,35 +10,28 @@ initialize() {
 	initializeRecombinationRate(0);}// 0 recombination rate for somatic mutations
 
 1 early (){ 
-	sim.addSubpop("p1", 100); // creates population 1 with 100 individual 
-	sim.addSubpop("p2",100); } // creates population 2 with 100 individual 
+	sim.addSubpop("p1", 1); // creates population 1 with 100 individual 
+	sim.addSubpop("p2",0); } // creates population 2 with 100 individual 
 
 // create reproduction block 
 reproduction(){
-	has_beneficial = F; 
-	for (mut in individual.haplosomes.mutations) {
-	if (mut.mutationType == m2) {
-		has_beneficial = T; // checks active population to see if there are any beneficial mutations present 
-		break;
-		}
-	}
-	if(has_beneficial){
-		subpop.addCloned(individual);// if a beneficial mutation is present, cell replicates 
-		}
-	}
+	subpop.addCloned(individual);
+	subpop.addCloned(individual);} // if a beneficial mutation is present, cell replicates 
+	
 // population maintence
 early () {
-	targetSize = 100; // keeps population size ~ 100 individuals 
+	targetSize = 150; // keeps population size ~ 100 individuals 
 	popSize = p1.individualCount;
 	p1.fitnessScaling = targetSize / popSize; 
 	for (ind in p1.individuals) {
 		if (ind.age >= 2) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
 			ind.fitnessScaling = 0.0;
+			sim.treeSeqRememberIndividuals(sim.subpopulations.individuals);
 		}
 	}
 }
 early () {
-	targetSize = 100; // keeps population size ~ 100 individuals 
+	targetSize = 150; // keeps population size ~ 100 individuals 
 	popSize = p2.individualCount;
 	p2.fitnessScaling = targetSize / popSize; 
 	for (ind in p1.individuals) {
@@ -48,20 +41,29 @@ early () {
 	}
 }
 
-1 late() { 
-	targetInd = sample(p1.individuals, 1); 
-	targetGenome = sample(targetInd.haplosomes, 2); 
-	targetGenome.addNewDrawnMutation(m2, 5000);}// adds mutation to 1 individual in population 
+10 late() {
+	inds = p1.individuals; 
+	newborns = inds[inds.age == 0]; //add an individual at 0 y/o to ensure you can add mutation 
 	
-100 early() { 
+	if (size(newborns) > 0){
+		ind = sample(newborns, 1);
+		
+		hapIndex = sample(0:1, 1);
+		
+		genome = ind.haplosomes[hapIndex];
+		genome.addNewDrawnMutation(m2, 10000); }
+		}
+		
+30 early() { 
 	if (p1.individualCount > 0) { 
 		migrants = sample(p1.individuals, 1); // moves 1 individuals from p1 to p2
 		p2.takeMigrants(migrants);}
 		}
 
 //save tree output file 
-200 late() {
-	sim.treeSeqOutput("./Beneficial_Mutation_Migration");
+100 late() {
+	sim.treeSeqOutput("./S3.tree");
 	sim.simulationFinished();}
+	
 	
 	
