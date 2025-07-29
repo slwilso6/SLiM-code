@@ -10,8 +10,7 @@ initialize() {
 	initializeRecombinationRate(0);}// 0 recombination rate for somatic mutations
 
 1 early (){ 
-	sim.addSubpop("p1", 1); // creates population 1 with 100 individual 
-	sim.addSubpop("p2",0); } // creates population 2 with 100 individual 
+	sim.addSubpop("p1", 1); // creates population 1 with 1 individual 
 
 // create reproduction block 
 reproduction(){
@@ -30,16 +29,6 @@ early () {
 		}
 	}
 }
-early () {
-	targetSize = 150; // keeps population size ~ 100 individuals 
-	popSize = p2.individualCount;
-	p2.fitnessScaling = targetSize / popSize; 
-	for (ind in p1.individuals) {
-		if (ind.age >= 2) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
-			ind.fitnessScaling = 0.0;
-		}
-	}
-}
 
 10 late() {
 	inds = p1.individuals; 
@@ -54,11 +43,6 @@ early () {
 		genome.addNewDrawnMutation(m2, 10000); }
 		}
 		
-30 early() { 
-	if (p1.individualCount > 0) { 
-		migrants = sample(p1.individuals, 1); // moves 1 individuals from p1 to p2
-		p2.takeMigrants(migrants);}
-		}
 
 //save tree output file 
 100 late() {
