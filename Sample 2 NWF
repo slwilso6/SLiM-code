@@ -14,13 +14,14 @@ initialize(){
 	sim.addSubpop("p1", 1); }
 	
 reproduction () { 
+	subpop.addCloned(individual);
 	subpop.addCloned(individual);}
 early() { 
 	targetSize = 150; 
 	popSize = p1.individualCount; 
 	p1.fitnessScaling = targetSize / popSize;
 	for (ind in p1.individuals) {
-		if (ind.age >= 100) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
+		if (ind.age >= 2) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
 			ind.fitnessScaling = 0.0;
 		}
 	}
@@ -31,6 +32,6 @@ early() {
 	targetGenome.addNewDrawnMutation(m2, 5000);}// adds mutation to 1 individual in population 
 
 200 late () { 
-	sim.treeSeqOutput("./Sample2NWF.tree");
+	sim.treeSeqOutput("./S2.tree");
 	sim.simulationFinished();}
 	
