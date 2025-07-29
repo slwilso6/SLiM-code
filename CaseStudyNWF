@@ -14,13 +14,14 @@ initialize(){
 	sim.addSubpop("p1", 1); }
 	
 reproduction () { 
+	subpop.addCloned(individual);
 	subpop.addCloned(individual);}
 early() { 
 	targetSize = 100000; 
 	popSize = p1.individualCount; 
 	p1.fitnessScaling = targetSize / popSize;
 	for (ind in p1.individuals) {
-		if (ind.age >= 35) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
+		if (ind.age >= 2) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
 			ind.fitnessScaling = 0.0;
 		}
 	}
