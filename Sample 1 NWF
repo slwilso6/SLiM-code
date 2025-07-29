@@ -1,58 +1,69 @@
 initialize() { 
 	initializeSLiMModelType("nonWF"); //switches SLiM model to nonWF
-	initializeTreeSeq(checkCoalescence=T); //begin tree sequence recording
+	initializeTreeSeq(); //begin tree sequence recording
 	initializeMutationRate(0); // set mutation rate for neutral mutations to 0 (placeholder)
 	initializeMutationType("m1", 0.5, "f", 0.0); // background neutral mutations
-	initializeMutationType("m2", 0.5, "f", 0.5); // Beneficial mutation for later 
+	initializeMutationType("m2", 0.5, "f", 0.6); // Beneficial mutation for later 
 	m2.convertToSubstitution =F; //prevents beneficial mutation from converting into substitution in case of fixation 
 	initializeGenomicElementType("g1", m1, 0.001); // builds chromosome elements, placeholder mutations set on chromosome to effectively leave it empty for beneficial mutation visualization 
 	initializeGenomicElement(g1, 0, 99999);// sets chromosome length
 	initializeRecombinationRate(0);}// 0 recombination rate for somatic mutations
 
 1 early (){ 
-	sim.addSubpop("p1", 1);}
+	sim.addSubpop("p1", 1); // creates population 1 with 100 individual 
+	sim.addSubpop("p2",0); } // creates population 2 with 100 individual 
 
 // create reproduction block 
 reproduction(){
- subpop.addCloned(individual);
- subpop.addCloned(individual);}
- 
-
+	subpop.addCloned(individual);
+	subpop.addCloned(individual);} // if a beneficial mutation is present, cell replicates 
+	
 // population maintence
 early () {
-	targetSize = 150; // keeps population size ~ 150 individuals 
+	targetSize = 150; // keeps population size ~ 100 individuals 
 	popSize = p1.individualCount;
 	p1.fitnessScaling = targetSize / popSize; 
 	for (ind in p1.individuals) {
-		if (ind.age >= 2) { // drops fitness of any individual older than 1 generations, this individual then gets cut out of the population 
+		if (ind.age >= 2) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
 			ind.fitnessScaling = 0.0;
-		sim.treeSeqRememberIndividuals(sim.subpopulations.individuals);} // remembers individuals in metadata even if they die
+			sim.treeSeqRememberIndividuals(sim.subpopulations.individuals);
 		}
 	}
+}
+early () {
+	targetSize = 150; // keeps population size ~ 100 individuals 
+	popSize = p2.individualCount;
+	p2.fitnessScaling = targetSize / popSize; 
+	for (ind in p1.individuals) {
+		if (ind.age >= 2) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
+			ind.fitnessScaling = 0.0;
+		}
+	}
+}
 
-
-
-50 late() {
-    inds = p1.individuals;
-    newborns = inds[inds.age == 0]; // add individual at 0 years old to insure you can add mutation 
-
-    if (size(newborns) > 0) {
-        ind = sample(newborns, 1);
-
-        // Pick a random genome (haplotype) to mutate: 0 or 1
-        hapIndex = sample(0:1, 1);
-
-        // Get the genome object
-        genome = ind.haplosomes[hapIndex];
-
-        genome.addNewDrawnMutation(m2, 10000); // add mutation type 2 at 10000 bp to individual 
-    }
-}		
-
-
+10 late() {
+	inds = p1.individuals; 
+	newborns = inds[inds.age == 0]; //add an individual at 0 y/o to ensure you can add mutation 
+	
+	if (size(newborns) > 0){
+		ind = sample(newborns, 1);
 		
+		hapIndex = sample(0:1, 1);
+		
+		genome = ind.haplosomes[hapIndex];
+		genome.addNewDrawnMutation(m2, 10000); }
+		}
+		
+30 early() { 
+	if (p1.individualCount > 0) { 
+		migrants = sample(p1.individuals, 1); // moves 1 individuals from p1 to p2
+		p2.takeMigrants(migrants);}
+		}
+
+//save tree output file 
 100 late() {
- sim.treeSeqOutput("./S1.tree");
- sim.simulationFinished();}
+	sim.treeSeqOutput("./S3.tree");
+	sim.simulationFinished();}
+	
 
 	
