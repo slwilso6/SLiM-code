@@ -21,8 +21,9 @@ early() {
 	popSize = p1.individualCount; 
 	p1.fitnessScaling = targetSize / popSize;
 	for (ind in p1.individuals) {
-		if (ind.age >= 2) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
+		if (ind.age >= 100) { // drops fitness of any individual older than 2 generations, this individual then gets cut out of the population 
 			ind.fitnessScaling = 0.0;
+	 sim.treeSeqRememberIndividuals(sim.subpopulations.individuals);
 		}
 	}
 }
